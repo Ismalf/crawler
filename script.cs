@@ -2,8 +2,6 @@
 #:package Microsoft.Extensions.Configuration.Json@10.0.5
 #:package HtmlAgilityPack@1.12.4
 
-using System;
-using System.Text;
 using HtmlAgilityPack;
 using Microsoft.Extensions.Configuration;
 
@@ -47,28 +45,81 @@ try
     var parseHTML = bool.Parse(root.GetSection("features:parseHTML").Value ?? "false");
     if (parseHTML)
     {
-        static int CountNodes(HtmlNode node)
-        {
-            if (node.HasChildNodes)
-            {
-                int nodes = 0;
-                foreach (var childNode in node.ChildNodes)
-                {
-                    nodes += CountNodes(childNode);
-                }
-                return nodes;
-            }
-            else
-            {
-                return 1;
-            }
-        }
+
         HtmlDocument htmlDocument = new();
         htmlDocument.LoadHtml(siteStructure);
-        Console.WriteLine($"HTML Parsed! Total nodes in document: {CountNodes(htmlDocument.DocumentNode)}");
+
+        if (root.GetSection("features:relevantTags").Exists())
+        {
+            static List<HtmlNode> GetByClass(HtmlNode parent, string classes)
+            {
+                if (parent.GetClasses().Contains(classes))
+                {
+                    return [parent];
+                }
+                else if (parent.HasChildNodes)
+                {
+                    List<HtmlNode> result = [];
+                    foreach (var node in parent.ChildNodes)
+                    {
+                        result.AddRange(GetByClass(node, classes));
+                    }
+                    return result;
+                }
+                else
+                {
+                    return [];
+                }
+            }
+
+            static string ParseSubmission(HtmlNode node)
+            {
+                var rank = GetByClass(node, "rank").First().InnerText;
+                var titleline = GetByClass(node, "titleline").First();
+                var title = titleline.ChildNodes.First(cnode => cnode.Name.Equals("a")).InnerText;
+                return $"{rank},{title}";
+            }
+
+            static string ParseSubtext(HtmlNode node)
+            {
+                var score = GetByClass(node, "score").First().InnerText;
+                var comments = node.ChildNodes.First().ChildNodes.FirstOrDefault(cnode => cnode.InnerText.Contains("comment"))?.InnerText ?? "";
+                return $"{score},{comments}";
+            }
+
+            var tags = root.GetSection("features:relevantTags").Value ?? "";
+
+            var resultSubmission = GetByClass(htmlDocument.DocumentNode, "submission").ToArray();
+            var resultSubtext = GetByClass(htmlDocument.DocumentNode, "subtext").ToArray();
+            List<Entry> entries = [];
+            for (int i = 0; i < resultSubmission.Length; i++)
+            {
+                var parsedSubmission = ParseSubmission(resultSubmission[i]);
+                var parsedSubtext = ParseSubtext(resultSubtext[i]);
+                entries.Add(new(parsedSubmission, parsedSubtext));
+                Console.WriteLine($"Parsed entry: {i + 1}");
+            }
+        }
     }
 }
 catch (UriFormatException ufe)
 {
     Console.WriteLine($"Format exception, could not parse the requested URL: {ufe.Message}");
+}
+
+class Entry
+{
+    string Rank { get; set; }
+    string Title { get; set; }
+    string Points { get; set; }
+    string Comments { get; set; }
+
+    public Entry(string submission, string subtext)
+    {
+        this.Rank = submission.Split(',')[0];
+        this.Title = submission.Split(',')[1];
+        this.Points = subtext.Split(',')[0].Split(' ')[0];
+        this.Comments = subtext.Split(',')[0].Split('&')[0];
+
+    }
 }
