@@ -145,7 +145,7 @@ class Entry
         Rank = submission.Split(',')[0];
         Title = submission.Split(',')[1];
         Points = subtext.Split(',')[0].Split(' ')[0];
-        Comments = subtext.Split(',')[0].Split('&')[0];
+        Comments = subtext.Split(',')[1].Split('&')[0];
     }
 }
 
