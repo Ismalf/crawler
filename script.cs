@@ -2,6 +2,8 @@
 #:package Microsoft.Extensions.Configuration.Json@10.0.5
 #:package HtmlAgilityPack@1.12.4
 
+using System.Reflection;
+using System.Xml.Linq;
 using HtmlAgilityPack;
 using Microsoft.Extensions.Configuration;
 
@@ -48,9 +50,10 @@ try
 
         HtmlDocument htmlDocument = new();
         htmlDocument.LoadHtml(siteStructure);
-
-        if (root.GetSection("features:relevantTags").Exists())
+        var extractData = bool.Parse(root.GetSection("features:extractData").Value ?? "false");
+        if (extractData)
         {
+
             static List<HtmlNode> GetByClass(HtmlNode parent, string classes)
             {
                 if (parent.GetClasses().Contains(classes))
@@ -87,18 +90,41 @@ try
                 return $"{score},{comments}";
             }
 
-            var tags = root.GetSection("features:relevantTags").Value ?? "";
 
             var resultSubmission = GetByClass(htmlDocument.DocumentNode, "submission").ToArray();
             var resultSubtext = GetByClass(htmlDocument.DocumentNode, "subtext").ToArray();
-            List<Entry> entries = [];
+            List<Entry> entriesList = [];
+            Console.WriteLine($"Parsing entries!");
             for (int i = 0; i < resultSubmission.Length; i++)
             {
                 var parsedSubmission = ParseSubmission(resultSubmission[i]);
                 var parsedSubtext = ParseSubtext(resultSubtext[i]);
-                entries.Add(new(parsedSubmission, parsedSubtext));
-                Console.WriteLine($"Parsed entry: {i + 1}");
+                entriesList.Add(new(parsedSubmission, parsedSubtext));
+
             }
+
+            Console.WriteLine($"Parsed successfully! Total parsed: {resultSubtext.Length}");
+            var entries = new Entries(entriesList);
+
+            var applyFilters = bool.Parse(root.GetSection("features:filter").Value ?? "false");
+            if (applyFilters)
+            {
+                if (args.Length == 1)
+                {
+                    Console.WriteLine("No filter was provided for filter feature");
+                    Console.WriteLine("Skiping this feature");
+                }
+                else if (int.TryParse(args[1], out int filter))
+                {
+                    switch (filter)
+                    {
+                        case 1: entries.FilterOne(); break;
+                        case 2: entries.FilterTwo(); break;
+                        default: break;
+                    }
+                }
+            }
+            //save on db
         }
     }
 }
@@ -116,10 +142,29 @@ class Entry
 
     public Entry(string submission, string subtext)
     {
-        this.Rank = submission.Split(',')[0];
-        this.Title = submission.Split(',')[1];
-        this.Points = subtext.Split(',')[0].Split(' ')[0];
-        this.Comments = subtext.Split(',')[0].Split('&')[0];
+        Rank = submission.Split(',')[0];
+        Title = submission.Split(',')[1];
+        Points = subtext.Split(',')[0].Split(' ')[0];
+        Comments = subtext.Split(',')[0].Split('&')[0];
+    }
+}
+
+class Entries
+{
+    List<Entry> Registry { get; set; } = [];
+
+    public Entries(List<Entry> Registry)
+    {
+        this.Registry = Registry;
+    }
+
+    public void FilterOne()
+    {
+
+    }
+
+    public void FilterTwo()
+    {
 
     }
 }
