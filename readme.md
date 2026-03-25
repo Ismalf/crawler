@@ -17,19 +17,15 @@ Implement feature flags for trunk based development.
 
 Be able to extract relevant data from the website.
 
-## 0.4.0
+## 0.4.0 [x]
 
 Implement the two described filters
 
-## 0.5.0
+## 0.5.0 [x]
 
 Save data to a database to have metrics of usage and recovered data.
 
 ## 0.6.0
-
-Refactor to full c# project
-
-## 0.7.0
 
 Implement automatic testing
 
