@@ -13,7 +13,7 @@ namespace script;
 public class Program
 {
 
-    static void Main(string[] args)
+    static async Task Main(string[] args)
     {
         if (args.Length == 0)
         {
@@ -33,13 +33,13 @@ public class Program
             ConsoleUtilities.Print($"Target DNS: {webSite.Authority}", ConsoleColor.Gray);
             ConsoleUtilities.Print($"Testing compliance (robots protocol)", ConsoleColor.Gray);
 
-            var client = new HttpClient
+            using var client = new HttpClient
             {
                 BaseAddress = webSite
             };
 
-            var robots =  client.GetAsync("/robots.txt").Result; // Web Scraping can be seen as a harmful behavior towards a web site
-            var robotsResponse = robots.Content.ReadAsStringAsync().Result;
+            var robots = await client.GetAsync("/robots.txt"); // Web Scraping can be seen as a harmful behavior towards a web site
+            var robotsResponse = await robots.Content.ReadAsStringAsync();
 
             if (robotsResponse.Split('\n').Any(robot => robot.RemoveAfterSymbol('?').Equals($"Disallow: {webSite.AbsolutePath}"))) // so we check the robots protocol just to be sure we can legally scrape the requested site
             {
@@ -51,8 +51,8 @@ public class Program
                 ConsoleUtilities.Print("No restriction found, proceeding", ConsoleColor.DarkYellow);
             }
 
-            var site = client.GetAsync($"{webSite.AbsolutePath}").Result;
-            var siteStructure = site.Content.ReadAsStringAsync().Result;
+            var site = await client.GetAsync($"{webSite.AbsolutePath}");
+            var siteStructure = await site.Content.ReadAsStringAsync();
 
             // load basic feature flags implementation from appsettings.json
             var root = new ConfigurationBuilder()
@@ -71,7 +71,7 @@ public class Program
                 {
                     var resultSubmission = htmlDocument.DocumentNode.GetByClass("submission", capacity).ToArray();
                     var resultSubtext = htmlDocument.DocumentNode.GetByClass("subtext", capacity).ToArray();
-                    // due to the structure of the page we have to count the submission and comments seccion as separate nodes.
+                    // due to the structure of the page we have to count the submission and comments section as separate nodes.
                     if (resultSubmission.Length != resultSubtext.Length) // there must be equal amount of submission and comment nodes
                     {
                         throw new Exception("Cannot determine full instances of submissions!");
@@ -135,6 +135,4 @@ public class Program
         }
         return;
     }
-
 }
-

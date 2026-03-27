@@ -1,3 +1,4 @@
+using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.FileProviders;
 
@@ -37,13 +38,19 @@ public class News(List<NewsPost> newsList)
     }
 
     /// <summary>
-    /// Custom export method 
+    /// Custom export method, string builder is more efficient
     /// </summary>
     /// <param name="filter"></param>
     /// <returns></returns>
     public string ExportCsv(string filter)
     {
         var timestamp = DateTime.Now.ToString("yyyyMMddHHmmss");
-        return string.Join('\n', [string.Format("{0},{1},{2},{3},{4},{5}", "Rank", "Title", "Points", "Comments", "Timestamp", "Filter"), .. Registry.Select(reg => string.Format("{0},{1},{2}", reg.CsvFormat(), timestamp, filter))]);
+        var sb = new StringBuilder();
+        sb.AppendLine("Rank,Title,Points,Comments,Timestamp,Filter");
+        foreach (var reg in Registry)
+        {
+            sb.AppendLine($"{reg.CsvFormat()},{timestamp},{filter}");
+        }
+        return sb.ToString();
     }
 }

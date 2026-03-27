@@ -3,10 +3,13 @@ using System.Text.RegularExpressions;
 namespace Entities;
 
 /// <summary>
-/// Represents a single entri on news.ycombinator.com
+/// Represents a single entry on news.ycombinator.com
 /// </summary>
 public class NewsPost
 {
+    private static readonly Regex NonNumericRegex = new(@"[^0-9]", RegexOptions.Compiled);
+    private static readonly Regex SpecialCharsRegex = new(@"[^a-zA-Z0-9 ]", RegexOptions.Compiled);
+
     public int Rank { get; set; }
     public string Title { get; set; }
     public int Points { get; set; }
@@ -14,15 +17,15 @@ public class NewsPost
 
     public NewsPost(string submission, string subtext)
     {
-        if (!int.TryParse(Regex.Replace(submission.Split(',')[0], @"[^0-9]", "") ?? "0", out int rankClean))
+        if (!int.TryParse(NonNumericRegex.Replace(submission.Split(',')[0], "") ?? "0", out int rankClean))
         {
             rankClean = 0;
         }
-        if (!int.TryParse(Regex.Replace(subtext.Split(',')[0], @"[^0-9]", "") ?? "0", out int pointsClean))
+        if (!int.TryParse(NonNumericRegex.Replace(subtext.Split(',')[0], "") ?? "0", out int pointsClean))
         {
             pointsClean = 0;
         }
-        if (!int.TryParse(Regex.Replace(subtext.Split(',')[1], @"[^0-9]", "") ?? "0", out int commentsClean))
+        if (!int.TryParse(NonNumericRegex.Replace(subtext.Split(',')[1], "") ?? "0", out int commentsClean))
         {
             commentsClean = 0;
         }
@@ -72,11 +75,11 @@ public class NewsPost
             return string.Empty;
 
         // Pattern: keep only a-z, A-Z, 0-9, space, underscore, dash
-        return Regex.Replace(input, @"[^a-zA-Z0-9 ]", "");
+        return SpecialCharsRegex.Replace(input, "");
     }
 
     /// <summary>
-    /// Remove special characters and count ammount of words.
+    /// Remove special characters and count amount of words.
     /// When counting words, consider only the spaced words and exclude any symbols. For instance, the phrase “This is - a self-explained example” should be counted as having 5 words.
     /// </summary>
     /// <param name="input"></param>

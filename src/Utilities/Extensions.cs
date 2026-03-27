@@ -5,8 +5,10 @@ namespace script.Utilities;
 public static class Extensions
 {
     /// <summary>
-    /// Recursive method to run through the HTML tree searching for a specific tag.
+    /// Iterative method to run through the HTML tree searching for a specific tag.
     /// In this scenario a tag is a css class name that has been previously identified in the target page.
+    /// 
+    /// Made as an extension method because this fits as part of a node functionality
     /// </summary>
     /// <param name="parent"></param>
     /// <param name="classes"></param>
@@ -14,44 +16,32 @@ public static class Extensions
     /// <returns></returns>
     public static List<HtmlNode> GetByClass(this HtmlNode parent, string classes, int capacity = 30)
     {
-        if (parent.GetClasses().Contains(classes))
-        {
-            return [parent];
-        }
-        else if (parent.HasChildNodes)
-        {
-            List<HtmlNode> result = [];
-            foreach (var node in parent.ChildNodes)
-            {
-                // Do not search for more than estimated capacity
-                if (result.Count < capacity)
-                {
-                    var recursiveResult = node.GetByClass(classes);
-                    if (capacity - result.Count - recursiveResult.Count == 0)
-                    {
-                        result.AddRange(recursiveResult);
-                    }
-                    else
-                    {
-                        result.AddRange(recursiveResult.Take(capacity - result.Count));
-                    }
-                }
-                else
-                {
-                    return result;
-                }
+        List<HtmlNode> result = [];
+        Queue<HtmlNode> queue = new();
+        queue.Enqueue(parent);
 
-            }
-            return result;
-        }
-        else
+        while (queue.Count > 0 && result.Count < capacity)
         {
-            return [];
+            var current = queue.Dequeue();
+            if (current.GetClasses().Contains(classes))
+            {
+                result.Add(current);
+                if (result.Count >= capacity) break;
+            }
+            if (current.HasChildNodes)
+            {
+                foreach (var child in current.ChildNodes)
+                {
+                    queue.Enqueue(child);
+                }
+            }
         }
+        return result;
     }
 
     /// <summary>
     /// Submission nodes contain relevant information in a very specific structure, read that structure and retrieve data
+    /// Made as an extension method because this fits as part of a node functionality in this use case.
     /// </summary>
     /// <param name="node"></param>
     /// <returns></returns>
@@ -64,7 +54,8 @@ public static class Extensions
     }
 
     /// <summary>
-    /// Submission nodes contain relevant information in a very specific structure, for comments and points that data is in the subtext node. Read that structure and retrieve data
+    /// Submission nodes contain relevant information in a very specific structure, for comments and points that data is in the subtext node. Read that structure and retrieve data.
+    /// Made as an extension method because this fits as part of a node functionality in this use case.
     /// </summary>
     /// <param name="node"></param>
     /// <returns></returns>
@@ -77,6 +68,8 @@ public static class Extensions
 
     /// <summary>
     /// Utility for any string, in this case its used to check for patterns on the robots.txt protocol
+    /// 
+    /// Made as an extension method because this fits as part of a string object.
     /// </summary>
     /// <param name="text"></param>
     /// <param name="symbol"></param>
