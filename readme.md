@@ -47,7 +47,7 @@ Save data to a database to have metrics of usage and recovered data.
 
 Implement automatic testing
 
-Status: Pending.
+Status: Delivered.
 
 ### 0.7.0
 
