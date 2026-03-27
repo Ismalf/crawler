@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using Entities;
+using script.Entities;
 using Xunit;
 
 namespace Tests.unit;

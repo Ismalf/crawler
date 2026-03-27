@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 
-namespace Entities;
+namespace script.Entities;
 
 /// <summary>
 /// Represents a single entry on news.ycombinator.com

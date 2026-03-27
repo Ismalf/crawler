@@ -2,7 +2,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.FileProviders;
 
-namespace Entities;
+namespace script.Entities;
 
 /// <summary>
 /// List of news posts

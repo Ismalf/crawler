@@ -2,7 +2,7 @@
 
 using System.Text;
 using System.Text.RegularExpressions;
-using Entities;
+using script.Entities;
 using HtmlAgilityPack;
 using Microsoft.Extensions.Configuration;
 using script.Utilities;
