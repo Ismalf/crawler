@@ -6,6 +6,40 @@ For ADR documentation, the following [template](https://github.com/joelparkerhen
 
 Please be sure to read ADRs to get full context of product development.
 
+## Key Design Choice Summary
+
+### Monolithic Architecture
+
+A single deployable file, no added complexity. Perfect for the product scope.
+
+### Single file executable (CLI).
+
+Single executable file accompanied by settings, perfect for cli usage and devops pipelines integration.
+
+### File export as storage
+
+Product scope didn't require complex storing solutions. Requirements are met with no overhead for development and operations teams.
+
+## Key Tradeoffs
+
+### Scalability
+
+For more demanding scrapping or more data retrieved from web sites file exports are not enough and would require non relational databases.
+
+### Extensibility
+
+New features like multiple targets and advanced scraping would require more complex features forcing a more flexible architecture oriented toward services.
+
+### Maintainability
+
+More modifications to the code and more added features can increase easily program complexity, making maintenance hard and error prone.
+
+## Branching Strategy
+
+### Trunk based development
+
+Small team in charge of the development, reducing overhead of managing branches and releases. Every new feature can be enabled and disabled accordingly.
+
 ## Roadmap
 
 To ensure proper product evolution and tracking, the following roadmap was built.
@@ -53,4 +87,11 @@ Status: Delivered.
 
 Full documentation on product and MVP release
 
-Status: Pending.
+Status: Delivered.
+
+## Development container
+
+A Development container configuration file was added for ease of exploration and execution for this project.
+
+Tested on VS Code.
+

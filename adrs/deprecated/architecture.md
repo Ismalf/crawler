@@ -2,15 +2,15 @@
 
 ## Status
 
-Current status is accepted.
+Current status is *deprecated*.
 
 ## Context
 
-Requirement to develop a scraping program to retrieve data from https://news.ycombinator.com.
+Requirement to develop a scraping product to retrieve data from https://news.ycombinator.com.
 
 ## Decision
 
-Use .Net 10 scripting capabilities to create a single file script.
+Monolithic. Use .Net 10 scripting capabilities to create a single file script.
 
 ## Consequences
 
